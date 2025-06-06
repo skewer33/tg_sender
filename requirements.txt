@@ -1,0 +1,6 @@
+aiogram>=3.1.1
+telethon>=1.33.0
+pandas>=2.0.0
+openpyxl>=3.1.0
+python-dotenv>=1.0.0
+markdown>=3.4.0

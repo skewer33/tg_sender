@@ -1,0 +1,9 @@
+.env
+*.session
+authorized_users.txt
+*.xlsx
+*.jpg
+/files
+*.in
+message.*
+send_log.txt
