@@ -33,8 +33,8 @@ This project includes a Telegram bot on `aiogram` and a script for sending messa
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourname/telegram-broadcast-bot.git
-cd telegram-broadcast-bot
+git clone https://github.com/skewer33/tg_sender.git
+cd tg_sender
 ```
 
 2. Install dependencies:
