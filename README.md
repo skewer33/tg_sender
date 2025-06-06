@@ -90,7 +90,8 @@ t.me/user3
 |user1|yes|
 |user2|no|
 |user3|no|
-  In that case script will send only for users with "sent == no" status
+
+In that case script will send only for users with "sent == no" status
 
 ### Message format
 
