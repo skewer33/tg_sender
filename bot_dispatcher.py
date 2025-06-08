@@ -14,7 +14,7 @@ import configparser
         
         
 # === CONFIG ===
-load_dotenv()
+load_dotenv(override=True)
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()

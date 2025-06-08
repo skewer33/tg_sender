@@ -24,13 +24,16 @@ def read_config(config_path='config.cfg'):
         'max_messages_per_day': cfg.getint('max_messages_per_day', 50),
         'delay_seconds': cfg.getint('delay_seconds', 60),
         'media_path': cfg.get('media_path', ''),
-        'media_type': cfg.get('media_type', '')
+        'media_type': cfg.get('media_type', ''),
+        'downloads_dir': cfg.get('downloads_dir', '')
     }
 
 # === LOAD ENV ===
-load_dotenv()
+load_dotenv(override=True)
 API_ID = int(os.getenv('API_ID'))
 API_HASH = os.getenv('API_HASH')
+print(API_ID, API_HASH)
+
 
 # === LOAD CONFIG ===
 config = read_config()
