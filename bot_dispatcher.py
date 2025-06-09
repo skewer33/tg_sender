@@ -1,3 +1,4 @@
+import sys
 import subprocess
 import asyncio
 import os
@@ -43,6 +44,9 @@ delay_seconds = config['delay_seconds']
 media_path = config['media_path']
 media_type = config['media_type']
 downloads_dir = config['downloads_dir']
+
+python_path = sys.executable  # путь к текущему Python-интерпретатору
+script_path = os.path.join(os.path.dirname(__file__), 'telegram_sender.py')
 
 def update_config(**kwargs):
     """
@@ -237,7 +241,7 @@ async def confirm_sending(message: types.Message, state: FSMContext):
 @dp.message(Form.sending)
 async def handle_sending(message: types.Message, state: FSMContext):
     await message.answer("🚀 Запускаю рассылку...", reply_markup=ReplyKeyboardRemove())
-    subprocess.Popen(['python', 'telegram_sender.py'])
+    subprocess.Popen([python_path, script_path])
     await message.answer("✅ Рассылка запущена. Ожидайте отчёт.")
     await state.set_state(Form.report)
     await handle_report(message, state)
