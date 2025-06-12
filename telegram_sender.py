@@ -5,7 +5,7 @@ import argparse
 import logging
 from dotenv import load_dotenv
 from telethon import TelegramClient
-from telethon.errors import PeerFloodError, UserPrivacyRestrictedError
+from telethon.errors import PeerFloodError, UserPrivacyRestrictedError, FloodWaitError
 
 from markdown import markdown as md_to_html
 import re
@@ -32,7 +32,6 @@ def read_config(config_path='config.cfg'):
 load_dotenv(override=True)
 API_ID = int(os.getenv('API_ID'))
 API_HASH = os.getenv('API_HASH')
-print(API_ID, API_HASH)
 
 
 # === LOAD CONFIG ===
@@ -48,6 +47,7 @@ media_type = config['media_type']
 # === LOGGING ===
 logging.basicConfig(
     filename='send_log.txt',
+    encoding='utf-8',
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
@@ -73,6 +73,19 @@ def load_contacts(filename='contacts.xlsx'):
         df = df.rename(columns={found_col: 'tg_username'})
     else:
         df.columns = ['tg_username']
+        
+    # name stripping and cleaning: remove leading/trailing spaces, @, and t.me links
+    df['tg_username'] = (
+        df['tg_username']
+        .astype(str)
+        .str.strip()
+        .str.replace(r'^https?://t\.me/', '', regex=True)
+        .str.replace(r'^t\.me/', '', regex=True)
+        .str.replace(r'^@', '', regex=True)
+    )
+    # remove duplicates based on 'tg_username'
+    df['tg_username'] = df['tg_username'].str.lower()
+    #df.drop_duplicates(subset='tg_username', keep='first', inplace=True)
 
     if 'sent' not in df.columns:
         df['sent'] = 'no'
@@ -159,8 +172,11 @@ async def main(contacts_file, message_file, limit, delay):
             break
         except UserPrivacyRestrictedError:
             logging.warning(f"🔒 Пользователь @{username} ограничил входящие.")
-        except Exception as e:
-            logging.error(f"❌ Ошибка @{username}: {e}")
+        except FloodWaitError as e:
+            wait_seconds = e.seconds
+            logging.warning(f'⏳ FloodWait: ждём {wait_seconds} секунд...')
+            await asyncio.sleep(wait_seconds)
+            continue  # пробуем снова после паузы
 
         time.sleep(delay)
 

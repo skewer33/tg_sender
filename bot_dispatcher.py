@@ -214,7 +214,7 @@ async def handle_message_text(message: types.Message, state: FSMContext):
 
     # repeat user message and show number of recipients
     df = pd.read_excel(contacts_file)
-    await message.answer(f"Ваше сообщение будет разослано по {len(df)} контактам:")
+    await message.answer(f"Ваше сообщение будет разослано по {len(df[df.sent == 'no'])} контактам:")
 
     if media_path:
         await message.answer_document(FSInputFile(media_path)) if message.document else await message.answer_photo(FSInputFile(media_path))
