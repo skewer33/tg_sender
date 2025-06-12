@@ -85,7 +85,7 @@ def load_contacts(filename='contacts.xlsx'):
     )
     # remove duplicates based on 'tg_username'
     df['tg_username'] = df['tg_username'].str.lower()
-    #df.drop_duplicates(subset='tg_username', keep='first', inplace=True)
+    df.drop_duplicates(subset='tg_username', keep='first', inplace=True)
 
     if 'sent' not in df.columns:
         df['sent'] = 'no'
