@@ -4,7 +4,7 @@ import asyncio
 import os
 import pandas as pd
 from aiogram import Bot, Dispatcher, types
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, FSInputFile
@@ -266,6 +266,19 @@ async def handle_report(message: types.Message, state: FSMContext):
 def get_all_authorized():
     with open("authorized_users.txt") as f:
         return [int(x.strip()) for x in f if x.strip().isdigit()]
+
+
+# === Send log command ===
+@dp.message(Command("log"))
+async def send_log_file(message: types.Message):
+    if not is_authorized(message.from_user.id):
+        await message.answer("❌ У вас нет доступа к логам.")
+        return
+
+    if os.path.exists("send_log.txt"):
+        await message.answer_document(FSInputFile("send_log.txt"))
+    else:
+        await message.answer("Файл лога не найден.")
 
 # === RUN ===
 async def main():

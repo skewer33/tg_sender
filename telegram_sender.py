@@ -52,6 +52,20 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
+# Clean up old log file if it exists and is older than LOG_MAX_AGE_DAYS
+LOG_FILE = 'send_log.txt'
+LOG_MAX_AGE_DAYS = 14  # 2 weeks
+
+def clean_old_log():
+    if os.path.exists(LOG_FILE):
+        file_age_days = (time.time() - os.path.getmtime(LOG_FILE)) / 86400
+        if file_age_days > LOG_MAX_AGE_DAYS:
+            os.remove(LOG_FILE)
+            print(f"🧹 Старый лог {LOG_FILE} удалён (был старше {LOG_MAX_AGE_DAYS} дней).")
+
+clean_old_log()
+
+
 # === LOAD CONTACTS ===
 def load_contacts(filename='contacts.xlsx'):
     try:
