@@ -5,7 +5,7 @@ import argparse
 import logging
 from dotenv import load_dotenv
 from telethon import TelegramClient
-from telethon.errors import PeerFloodError, UserPrivacyRestrictedError, FloodWaitError
+from telethon.errors import PeerFloodError, UserPrivacyRestrictedError, FloodWaitError, RPCError
 
 from markdown import markdown as md_to_html
 import re
@@ -100,11 +100,17 @@ def load_contacts(filename='contacts.xlsx'):
     # remove duplicates based on 'tg_username'
     df['tg_username'] = df['tg_username'].str.lower()
     df.drop_duplicates(subset='tg_username', keep='first', inplace=True)
-
+    
+    # sent column handling
     if 'sent' not in df.columns:
         df['sent'] = 'no'
     else:
         df['sent'] = df['sent'].fillna('no')
+    # error column handling
+    if 'error' not in df.columns:
+        df['error'] = ''
+    else:
+        df['error'] = df['error'].fillna('')
 
     return df
 
@@ -186,11 +192,27 @@ async def main(contacts_file, message_file, limit, delay):
             break
         except UserPrivacyRestrictedError:
             logging.warning(f"🔒 Пользователь @{username} ограничил входящие.")
+            df.at[idx, 'error'] = 'privacy_restricted'
         except FloodWaitError as e:
             wait_seconds = e.seconds
             logging.warning(f'⏳ FloodWait: ждём {wait_seconds} секунд...')
             await asyncio.sleep(wait_seconds)
             continue  # пробуем снова после паузы
+        except RPCError as e:
+            if 'PRIVACY_PREMIUM_REQUIRED' in str(e):
+                logging.warning(f"🚫 @{username} требует Telegram Premium для получения сообщений.")
+                df.at[idx, 'error'] = 'premium_required'
+            else:
+                logging.error(f"❌ RPCError @{username}: {e}")
+                df.at[idx, 'error'] = str(e)
+        except Exception as e:
+            err_msg = str(e)
+            if 'USERNAME_NOT_OCCUPIED' in err_msg or 'UsernameNotOccupied' in err_msg:
+                logging.warning(f"❌ Username @{username} не существует.")
+                df.at[idx, 'error'] = 'not_found'
+            else:
+                logging.error(f"❌ Ошибка @{username}: {err_msg}")
+                df.at[idx, 'error'] = err_msg
 
         time.sleep(delay)
 
